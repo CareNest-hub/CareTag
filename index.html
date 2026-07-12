@@ -1,0 +1,2520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="CareTag dynamic emergency medical QR profile prototype." />
+  <title>CareTag | Emergency Medical QR Profile</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+:root {
+  --bg: #f4f8f7;
+  --surface: rgba(255, 255, 255, 0.94);
+  --surface-solid: #ffffff;
+  --surface-soft: #eef7f4;
+  --text: #132b26;
+  --muted: #687d77;
+  --line: #dbe8e4;
+  --primary: #087f68;
+  --primary-dark: #056554;
+  --primary-soft: #dff5ee;
+  --accent: #f1a44b;
+  --danger: #d84c4c;
+  --danger-soft: #fff0ef;
+  --shadow: 0 22px 55px rgba(21, 73, 62, 0.11);
+  --radius-xl: 26px;
+  --radius-lg: 18px;
+  --radius-md: 13px;
+  --font-body: "DM Sans", system-ui, sans-serif;
+  --font-display: "Manrope", system-ui, sans-serif;
+}
+
+body.dark {
+  --bg: #0c1715;
+  --surface: rgba(19, 35, 31, 0.96);
+  --surface-solid: #13231f;
+  --surface-soft: #19312b;
+  --text: #e9f5f1;
+  --muted: #a0b6af;
+  --line: #29443d;
+  --primary: #35c59f;
+  --primary-dark: #27ae8b;
+  --primary-soft: #183e34;
+  --danger-soft: #3a2020;
+  --shadow: 0 24px 65px rgba(0, 0, 0, 0.28);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  transition: background 0.25s ease, color 0.25s ease;
+  overflow-x: hidden;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+.ambient {
+  position: fixed;
+  z-index: -1;
+  border-radius: 999px;
+  filter: blur(10px);
+  pointer-events: none;
+}
+
+.ambient-one {
+  width: 420px;
+  height: 420px;
+  top: -170px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(49, 190, 155, 0.18), transparent 70%);
+}
+
+.ambient-two {
+  width: 360px;
+  height: 360px;
+  bottom: -130px;
+  left: -110px;
+  background: radial-gradient(circle, rgba(241, 164, 75, 0.15), transparent 70%);
+}
+
+.topbar {
+  width: min(1260px, calc(100% - 36px));
+  margin: 0 auto;
+  padding: 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+}
+
+.brand-mark svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--primary);
+}
+
+.brand-mark .brand-cross {
+  fill: white;
+}
+
+.brand strong {
+  display: block;
+  font: 800 1.18rem/1 var(--font-display);
+}
+
+.brand small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 0.8rem;
+  box-shadow: 0 8px 25px rgba(21, 73, 62, 0.05);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.icon-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 1.15rem;
+}
+
+.app-shell {
+  width: min(1260px, calc(100% - 36px));
+  margin: 0 auto 60px;
+}
+
+.hero {
+  padding: 55px 0 44px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 36px;
+}
+
+.hero-copy {
+  max-width: 790px;
+}
+
+.eyebrow,
+.section-kicker {
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.hero h1 {
+  max-width: 850px;
+  margin: 13px 0 16px;
+  font: 800 clamp(2.35rem, 5vw, 4.8rem)/1.04 var(--font-display);
+  letter-spacing: -0.05em;
+}
+
+.hero h1 span {
+  color: var(--primary);
+}
+
+.hero p {
+  max-width: 715px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.75;
+}
+
+.hero-chip {
+  width: 310px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.hero-icon {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 1.3rem;
+}
+
+.hero-chip strong,
+.hero-chip span {
+  display: block;
+}
+
+.hero-chip strong {
+  margin-bottom: 3px;
+  font-size: 0.92rem;
+}
+
+.hero-chip span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(355px, 0.65fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.editor {
+  padding: 30px;
+}
+
+.card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.card-heading.compact {
+  margin-bottom: 18px;
+}
+
+.card-heading h2 {
+  margin: 5px 0 0;
+  font: 800 1.55rem/1.2 var(--font-display);
+}
+
+.autosave {
+  min-width: 75px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  text-align: right;
+}
+
+.privacy-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 15px;
+  border: 1px solid color-mix(in srgb, var(--primary) 25%, var(--line));
+  border-radius: var(--radius-md);
+  background: var(--surface-soft);
+}
+
+.privacy-notice p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.81rem;
+  line-height: 1.55;
+}
+
+.form-section {
+  padding: 28px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.section-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.step-number {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.section-title h3 {
+  margin: 1px 0 4px;
+  font: 800 1.02rem/1.2 var(--font-display);
+}
+
+.section-title p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.field-grid {
+  display: grid;
+  gap: 17px;
+}
+
+.two-columns {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.full-width {
+  grid-column: 1 / -1;
+}
+
+.field {
+  display: block;
+}
+
+.field > span,
+.field-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.field b {
+  color: var(--danger);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  outline: none;
+  background: var(--surface-solid);
+  color: var(--text);
+  transition: border 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.field input,
+.field select {
+  height: 46px;
+  padding: 0 13px;
+}
+
+.field textarea {
+  min-height: 92px;
+  padding: 12px 13px;
+  resize: vertical;
+  line-height: 1.55;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.field input[readonly] {
+  color: var(--muted);
+  background: var(--surface-soft);
+}
+
+.field small,
+.repeatable-heading small {
+  display: block;
+  margin-top: 7px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.error-message {
+  display: none !important;
+  color: var(--danger) !important;
+}
+
+.field.invalid .error-message {
+  display: block !important;
+}
+
+.field.invalid input {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 4px var(--danger-soft);
+}
+
+.input-action {
+  display: flex;
+}
+
+.input-action input {
+  border-radius: 12px 0 0 12px;
+}
+
+.input-action button {
+  width: 48px;
+  border: 1px solid var(--line);
+  border-left: 0;
+  border-radius: 0 12px 12px 0;
+  background: var(--surface-soft);
+  color: var(--primary);
+  font-size: 1.05rem;
+}
+
+.repeatable-heading {
+  margin: 20px 0 12px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.repeatable-heading .field-label {
+  margin-bottom: 0;
+}
+
+.medication-list {
+  display: grid;
+  gap: 10px;
+}
+
+.medication-item {
+  display: grid;
+  grid-template-columns: 1.4fr 0.7fr 1fr auto;
+  gap: 9px;
+  align-items: center;
+  animation: fadeUp 0.25s ease;
+}
+
+.medication-item input {
+  min-width: 0;
+  height: 43px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  outline: none;
+  background: var(--surface-solid);
+  color: var(--text);
+}
+
+.medication-item input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-soft);
+}
+
+.remove-medication {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 1rem;
+}
+
+.selection-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.check-card {
+  position: relative;
+  min-height: 76px;
+  padding: 14px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-solid);
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.check-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--primary) 45%, var(--line));
+}
+
+.check-card input {
+  position: absolute;
+  opacity: 0;
+}
+
+.fake-check {
+  flex: 0 0 25px;
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: transparent;
+  background: var(--surface-soft);
+  transition: 0.2s ease;
+}
+
+.check-card input:checked + .fake-check {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: white;
+}
+
+.check-card strong,
+.check-card small {
+  display: block;
+}
+
+.check-card strong {
+  margin-bottom: 3px;
+  font-size: 0.82rem;
+}
+
+.check-card small {
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.35;
+}
+
+.form-actions {
+  padding-top: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 11px;
+}
+
+.primary-button,
+.secondary-button,
+.ghost-button,
+.text-button,
+.call-button {
+  border: 0;
+  border-radius: 12px;
+  font-weight: 700;
+  transition: transform 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover,
+.call-button:hover {
+  transform: translateY(-2px);
+}
+
+.primary-button {
+  min-height: 48px;
+  padding: 0 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--primary);
+  color: white;
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--primary) 26%, transparent);
+}
+
+.primary-button:hover {
+  background: var(--primary-dark);
+}
+
+.secondary-button {
+  min-height: 40px;
+  padding: 0 13px;
+  border: 1px solid var(--line);
+  background: var(--surface-solid);
+  color: var(--text);
+}
+
+.ghost-button {
+  min-height: 45px;
+  padding: 0 16px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.text-button {
+  padding: 7px 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 0.8rem;
+}
+
+.preview-column {
+  position: sticky;
+  top: 18px;
+  display: grid;
+  gap: 15px;
+}
+
+.preview-card {
+  padding: 22px;
+}
+
+.caretag-card {
+  position: relative;
+  overflow: hidden;
+  padding: 21px;
+  border-radius: 21px;
+  background:
+    radial-gradient(circle at 85% 10%, rgba(255,255,255,0.17), transparent 23%),
+    linear-gradient(145deg, #0c8a72, #075f51);
+  color: white;
+  box-shadow: 0 24px 50px rgba(3, 83, 68, 0.28);
+}
+
+.caretag-card::after {
+  content: "";
+  position: absolute;
+  width: 230px;
+  height: 230px;
+  right: -130px;
+  bottom: -150px;
+  border: 28px solid rgba(255,255,255,0.06);
+  border-radius: 50%;
+}
+
+.card-top,
+.identity-row,
+.qr-panel {
+  position: relative;
+  z-index: 1;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mini-brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.mini-brand span {
+  width: 27px;
+  height: 27px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: white;
+  color: #087f68;
+}
+
+.mini-brand strong {
+  font-family: var(--font-display);
+}
+
+.card-type {
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+  opacity: 0.8;
+}
+
+.identity-row {
+  margin: 24px 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 15px;
+  background: rgba(255,255,255,0.14);
+  color: white;
+  font-weight: 800;
+}
+
+.avatar.large {
+  flex-basis: 60px;
+  width: 60px;
+  height: 60px;
+  border-color: var(--line);
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 1.08rem;
+}
+
+.identity-row h3 {
+  margin: 0 0 4px;
+  font: 800 1.25rem/1.2 var(--font-display);
+}
+
+.identity-row p {
+  margin: 0;
+  color: rgba(255,255,255,0.72);
+  font-size: 0.76rem;
+}
+
+.medical-alert {
+  position: relative;
+  z-index: 1;
+  padding: 11px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 13px;
+  background: #fff4e9;
+  color: #7a3d0d;
+}
+
+.medical-alert > span {
+  width: 29px;
+  height: 29px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e07721;
+  color: white;
+  font-weight: 800;
+}
+
+.medical-alert small,
+.medical-alert strong {
+  display: block;
+}
+
+.medical-alert small {
+  margin-bottom: 2px;
+  font-size: 0.57rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.medical-alert strong {
+  font-size: 0.77rem;
+  line-height: 1.35;
+}
+
+.preview-details {
+  position: relative;
+  z-index: 1;
+  padding: 16px 0;
+  display: grid;
+  gap: 12px;
+}
+
+.preview-details > div {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.13);
+}
+
+.preview-details > div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.preview-details small {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  opacity: 0.65;
+}
+
+.preview-details p {
+  margin: 4px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.qr-panel {
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: 12px;
+  align-items: center;
+  border-radius: 14px;
+  background: white;
+  color: #17332d;
+}
+
+#qrcode {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f2f6f5;
+}
+
+#qrcode img,
+#qrcode canvas {
+  width: 88px !important;
+  height: 88px !important;
+}
+
+.qr-placeholder {
+  padding: 7px;
+  text-align: center;
+  color: #758b84;
+}
+
+.qr-placeholder span {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 1.8rem;
+}
+
+.qr-placeholder p {
+  margin: 0;
+  font-size: 0.58rem;
+  line-height: 1.25;
+}
+
+.qr-panel small,
+.qr-panel strong,
+.qr-panel p {
+  display: block;
+}
+
+.qr-panel small {
+  color: #70857f;
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+}
+
+.qr-panel strong {
+  margin: 5px 0;
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+}
+
+.qr-panel p {
+  margin: 0;
+  color: #70857f;
+  font-size: 0.64rem;
+  line-height: 1.4;
+}
+
+.preview-actions {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+
+.wide {
+  width: 100%;
+}
+
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+.info-card {
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.info-icon {
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-weight: 800;
+}
+
+.info-card strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+}
+
+.info-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+.toast {
+  position: fixed;
+  z-index: 100;
+  left: 50%;
+  bottom: 24px;
+  padding: 12px 17px;
+  border-radius: 999px;
+  background: var(--text);
+  color: var(--surface-solid);
+  font-size: 0.8rem;
+  font-weight: 700;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transform: translate(-50%, 16px);
+  pointer-events: none;
+  transition: 0.25s ease;
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.modal-backdrop {
+  position: fixed;
+  z-index: 90;
+  inset: 0;
+  padding: 22px;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 19, 16, 0.68);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  visibility: hidden;
+  transition: 0.25s ease;
+}
+
+.modal-backdrop.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.emergency-modal {
+  position: relative;
+  width: min(650px, 100%);
+  max-height: calc(100vh - 44px);
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--surface-solid);
+  color: var(--text);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.35);
+  transform: translateY(14px) scale(0.98);
+  transition: 0.25s ease;
+}
+
+.modal-backdrop.open .emergency-modal {
+  transform: translateY(0) scale(1);
+}
+
+.modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-soft);
+  color: var(--muted);
+  font-size: 1.25rem;
+}
+
+.emergency-header {
+  padding-right: 45px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.emergency-symbol {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 1.25rem;
+}
+
+.emergency-header span:not(.emergency-symbol) {
+  color: var(--danger);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.emergency-header h2 {
+  margin: 4px 0 0;
+  font: 800 1.45rem/1.2 var(--font-display);
+}
+
+.emergency-person {
+  margin: 23px 0 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+}
+
+.emergency-person h3 {
+  margin: 0 0 3px;
+  font: 800 1.15rem/1.2 var(--font-display);
+}
+
+.emergency-person p {
+  margin: 0 0 5px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.emergency-person code {
+  color: var(--primary);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.emergency-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+
+.emergency-section {
+  padding: 15px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
+}
+
+.emergency-section.critical {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  background: var(--danger-soft);
+}
+
+.emergency-section.full {
+  grid-column: 1 / -1;
+}
+
+.emergency-section small {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.emergency-section p,
+.emergency-section ul {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.emergency-section ul {
+  padding-left: 18px;
+}
+
+.emergency-footer {
+  margin-top: 18px;
+  padding-top: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  border-top: 1px solid var(--line);
+}
+
+.emergency-footer p {
+  max-width: 340px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.call-button {
+  flex: 0 0 auto;
+  padding: 12px 15px;
+  background: var(--primary);
+  color: white;
+  text-decoration: none;
+  font-size: 0.78rem;
+}
+
+.call-button[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 980px) {
+  .hero {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hero-chip {
+    width: 100%;
+    max-width: 520px;
+  }
+
+  .workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-column {
+    position: static;
+    grid-row: 1;
+  }
+
+  .preview-card {
+    display: grid;
+  }
+
+  .caretag-card {
+    width: min(470px, 100%);
+    justify-self: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .topbar,
+  .app-shell {
+    width: min(100% - 24px, 1260px);
+  }
+
+  .topbar {
+    padding: 16px 0;
+  }
+
+  .status-pill {
+    display: none;
+  }
+
+  .hero {
+    padding: 35px 0 30px;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.25rem, 13vw, 3.5rem);
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+  }
+
+  .editor,
+  .preview-card {
+    padding: 18px;
+  }
+
+  .two-columns,
+  .selection-grid,
+  .emergency-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .full-width,
+  .emergency-section.full {
+    grid-column: auto;
+  }
+
+  .medication-item {
+    grid-template-columns: 1fr 1fr auto;
+  }
+
+  .medication-item input:first-child {
+    grid-column: 1 / -2;
+  }
+
+  .repeatable-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+
+  .primary-button,
+  .ghost-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .qr-panel {
+    grid-template-columns: 82px 1fr;
+  }
+
+  #qrcode {
+    width: 82px;
+    height: 82px;
+  }
+
+  #qrcode img,
+  #qrcode canvas {
+    width: 76px !important;
+    height: 76px !important;
+  }
+
+  .emergency-modal {
+    padding: 21px;
+  }
+
+  .emergency-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .call-button {
+    text-align: center;
+  }
+}
+
+
+/* Public emergency page opened after scanning the QR */
+.emergency-page-body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(8,127,104,.16), transparent 34%),
+    var(--bg);
+}
+
+.public-emergency-shell {
+  width: min(760px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 26px 0 50px;
+}
+
+.public-emergency-brand {
+  padding: 4px 2px 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.emergency-status {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.public-emergency-card,
+.invalid-profile {
+  padding: clamp(22px, 5vw, 38px);
+  border: 1px solid var(--line);
+  border-radius: 26px;
+  background: var(--surface-solid);
+  box-shadow: var(--shadow);
+}
+
+.public-alert-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.public-alert-header > div > span {
+  color: var(--danger);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.public-alert-header h1 {
+  margin: 5px 0 4px;
+  font: 800 clamp(1.6rem, 5vw, 2.4rem)/1.12 var(--font-display);
+}
+
+.public-alert-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.public-id-row {
+  margin: 22px 0 15px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 13px;
+  background: var(--surface-soft);
+}
+
+.public-id-row span {
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.public-id-row strong {
+  color: var(--primary);
+  font-family: var(--font-display);
+}
+
+.public-emergency-grid {
+  display: grid;
+  gap: 11px;
+}
+
+.public-section {
+  padding: 17px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.public-section.critical {
+  border-color: color-mix(in srgb, var(--danger) 35%, var(--line));
+  background: var(--danger-soft);
+}
+
+.public-section small {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--muted);
+  font-size: .64rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+}
+
+.public-section p,
+.public-section ul {
+  margin: 0;
+  line-height: 1.58;
+}
+
+.public-section ul {
+  padding-left: 20px;
+}
+
+.public-section.contact p {
+  display: grid;
+  gap: 3px;
+}
+
+.public-section.contact span {
+  color: var(--muted);
+  font-size: .86rem;
+}
+
+.public-call-button {
+  margin-top: 17px;
+  min-height: 52px;
+  padding: 0 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--primary);
+  color: white;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.public-call-button[aria-disabled="true"] {
+  pointer-events: none;
+  opacity: .45;
+}
+
+.public-disclaimer {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: .72rem;
+  line-height: 1.55;
+  text-align: center;
+}
+
+.invalid-profile {
+  text-align: center;
+}
+
+.invalid-profile > span {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 13px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.invalid-profile h1 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+}
+
+.invalid-profile p {
+  max-width: 480px;
+  margin: 0 auto;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+@media (max-width: 540px) {
+  .public-emergency-brand {
+    align-items: flex-start;
+  }
+
+  .emergency-status {
+    font-size: .58rem;
+  }
+
+  .public-alert-header {
+    align-items: flex-start;
+  }
+}
+
+</style>
+
+  <!-- QRCode.js: used only for generating the QR image in the browser. -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="CareTag home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 48 48">
+          <path d="M24 43C14.8 36.8 7 29.1 7 18.8 7 11.8 12.2 7 18.5 7c3.3 0 5.4 1.5 7.1 3.9C27.2 8.5 29.4 7 32.5 7 38.8 7 44 11.8 44 18.8 44 29.1 36.2 36.8 27 43l-1.5 1-1.5-1Z"/>
+          <path class="brand-cross" d="M22 15h7v6h6v7h-6v6h-7v-6h-6v-7h6z"/>
+        </svg>
+      </span>
+      <span>
+        <strong>CareTag</strong>
+        <small>Scan. Know. Respond.</small>
+      </span>
+    </a>
+
+    <div class="top-actions">
+      <span class="status-pill">
+        <span class="status-dot"></span>
+        CareTag ready
+      </span>
+      <button class="icon-button" id="themeToggle" type="button" aria-label="Toggle dark mode" title="Toggle theme">
+        <span id="themeIcon">☾</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="hero">
+      <div class="hero-copy">
+        <span class="eyebrow">SMART EMERGENCY IDENTIFICATION</span>
+        <h1>Your essential medical information, <span>one scan away.</span></h1>
+        <p>
+          Build a CareTag profile for a QR bracelet or keychain. Choose which health details
+          are included, generate the QR code, and preview what a responder may see.
+        </p>
+      </div>
+
+      <div class="hero-chip">
+        <div class="hero-icon">✚</div>
+        <div>
+          <strong>Emergency-ready profile</strong>
+          <span>Designed for quick access to critical details</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <form class="editor card" id="careTagForm" novalidate>
+        <div class="card-heading">
+          <div>
+            <span class="section-kicker">PROFILE BUILDER</span>
+            <h2>Create your CareTag</h2>
+          </div>
+          <span class="autosave" id="saveStatus">Not saved</span>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">
+            <span class="step-number">1</span>
+            <div>
+              <h3>Basic profile</h3>
+              <p>Information that identifies the CareTag owner.</p>
+            </div>
+          </div>
+
+          <div class="field-grid two-columns">
+            <label class="field">
+              <span>Full name <b>*</b></span>
+              <input id="fullName" name="fullName" type="text" maxlength="80"
+                     placeholder="e.g., Maria Santos" required />
+              <small class="error-message">Please enter a name.</small>
+            </label>
+
+            <label class="field">
+              <span>Date of birth</span>
+              <input id="birthDate" name="birthDate" type="date" />
+            </label>
+
+            <label class="field">
+              <span>Blood type</span>
+              <select id="bloodType" name="bloodType">
+                <option value="">Select blood type</option>
+                <option>A+</option><option>A-</option>
+                <option>B+</option><option>B-</option>
+                <option>AB+</option><option>AB-</option>
+                <option>O+</option><option>O-</option>
+                <option>Unknown</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>CareTag ID</span>
+              <div class="input-action">
+                <input id="careTagId" name="careTagId" type="text" readonly />
+                <button id="regenerateId" type="button" title="Generate a new ID">↻</button>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">
+            <span class="step-number">2</span>
+            <div>
+              <h3>Medical information</h3>
+              <p>Add only details that may be helpful during an emergency.</p>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>Allergies</span>
+            <textarea id="allergies" name="allergies" rows="3"
+                      placeholder="e.g., Penicillin, peanuts, latex"></textarea>
+            <small>Separate multiple entries using commas.</small>
+          </label>
+
+          <label class="field">
+            <span>Current medical history or conditions</span>
+            <textarea id="medicalHistory" name="medicalHistory" rows="3"
+                      placeholder="e.g., Asthma, hypertension, diabetes"></textarea>
+          </label>
+
+          <div class="repeatable-heading">
+            <div>
+              <span class="field-label">Current medications</span>
+              <small>Add the medication name, dose, and schedule when known.</small>
+            </div>
+            <button class="secondary-button" id="addMedication" type="button">
+              <span>＋</span> Add medication
+            </button>
+          </div>
+
+          <div class="medication-list" id="medicationList"></div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">
+            <span class="step-number">3</span>
+            <div>
+              <h3>Emergency contact</h3>
+              <p>The person responders should contact first.</p>
+            </div>
+          </div>
+
+          <div class="field-grid two-columns">
+            <label class="field">
+              <span>Contact name <b>*</b></span>
+              <input id="contactName" name="contactName" type="text"
+                     placeholder="e.g., Juan Santos" required />
+              <small class="error-message">Please enter an emergency contact.</small>
+            </label>
+
+            <label class="field">
+              <span>Relationship</span>
+              <input id="relationship" name="relationship" type="text"
+                     placeholder="e.g., Parent, spouse, sibling" />
+            </label>
+
+            <label class="field full-width">
+              <span>Phone number <b>*</b></span>
+              <input id="contactPhone" name="contactPhone" type="tel"
+                     placeholder="e.g., +63 917 123 4567" required />
+              <small class="error-message">Please enter a valid contact number.</small>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-title">
+            <span class="step-number">4</span>
+            <div>
+              <h3>Select QR information</h3>
+              <p>Control which profile sections are encoded in the QR.</p>
+            </div>
+          </div>
+
+          <div class="selection-grid">
+            <label class="check-card">
+              <input type="checkbox" data-include="basic" checked disabled />
+              <span class="fake-check">✓</span>
+              <span>
+                <strong>Basic profile</strong>
+                <small>Name, age, blood type, CareTag ID</small>
+              </span>
+            </label>
+
+            <label class="check-card">
+              <input type="checkbox" data-include="allergies" checked />
+              <span class="fake-check">✓</span>
+              <span>
+                <strong>Allergies</strong>
+                <small>Food, drug, and material allergies</small>
+              </span>
+            </label>
+
+            <label class="check-card">
+              <input type="checkbox" data-include="history" checked />
+              <span class="fake-check">✓</span>
+              <span>
+                <strong>Medical history</strong>
+                <small>Current conditions and health history</small>
+              </span>
+            </label>
+
+            <label class="check-card">
+              <input type="checkbox" data-include="medications" checked />
+              <span class="fake-check">✓</span>
+              <span>
+                <strong>Medications</strong>
+                <small>Current medicines and instructions</small>
+              </span>
+            </label>
+
+            <label class="check-card">
+              <input type="checkbox" data-include="contact" checked disabled />
+              <span class="fake-check">✓</span>
+              <span>
+                <strong>Emergency contact</strong>
+                <small>Contact person and phone number</small>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button class="ghost-button" id="resetForm" type="button">Reset</button>
+          <button class="primary-button" type="submit">
+            Generate CareTag QR
+            <span aria-hidden="true">→</span>
+          </button>
+        </div>
+      </form>
+
+      <aside class="preview-column">
+        <div class="preview-card card">
+          <div class="card-heading compact">
+            <div>
+              <span class="section-kicker">LIVE PREVIEW</span>
+              <h2>CareTag card</h2>
+            </div>
+            <button class="text-button" id="previewEmergency" type="button">
+              Emergency view
+            </button>
+          </div>
+
+          <div class="caretag-card" id="careTagCard">
+            <div class="card-top">
+              <div class="mini-brand">
+                <span>✚</span>
+                <strong>CareTag</strong>
+              </div>
+              <span class="card-type">MEDICAL ID</span>
+            </div>
+
+            <div class="identity-row">
+              <div class="avatar" id="avatarInitials">CT</div>
+              <div>
+                <h3 id="previewName">Your Name</h3>
+                <p id="previewMeta">Age not set · Blood type not set</p>
+              </div>
+            </div>
+
+            <div class="medical-alert" id="allergyAlert">
+              <span>!</span>
+              <div>
+                <small>KNOWN ALLERGIES</small>
+                <strong id="previewAllergies">None listed</strong>
+              </div>
+            </div>
+
+            <div class="preview-details">
+              <div>
+                <small>MEDICAL CONDITIONS</small>
+                <p id="previewHistory">None listed</p>
+              </div>
+              <div>
+                <small>CURRENT MEDICATIONS</small>
+                <p id="previewMedications">None listed</p>
+              </div>
+              <div>
+                <small>EMERGENCY CONTACT</small>
+                <p id="previewContact">Not provided</p>
+              </div>
+            </div>
+
+            <div class="qr-panel">
+              <div id="qrcode" aria-label="Generated CareTag QR code">
+                <div class="qr-placeholder">
+                  <span>▦</span>
+                  <p>Generate a QR that opens the emergency profile page</p>
+                </div>
+              </div>
+              <div>
+                <small>SCAN FOR MEDICAL PROFILE</small>
+                <strong id="previewId">CT-000000</strong>
+                <p>For emergencies, contact the listed person.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="preview-actions">
+            <button class="secondary-button wide" id="downloadQR" type="button" disabled>
+              Download QR
+            </button>
+            <button class="secondary-button wide" id="copyData" type="button" disabled>
+              Copy encoded data
+            </button>
+          </div>
+        </div>
+
+        <div class="info-card">
+          <span class="info-icon">i</span>
+          <div>
+            <strong>Prototype safety note</strong>
+            <p>
+              A CareTag should supplement—not replace—professional assessment, official
+              medical records, prescribed medical identification, or emergency services.
+            </p>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <div class="modal-backdrop" id="emergencyModal" aria-hidden="true">
+    <section class="emergency-modal" role="dialog" aria-modal="true"
+             aria-labelledby="emergencyTitle">
+      <button class="modal-close" id="closeModal" type="button" aria-label="Close">×</button>
+
+      <div class="emergency-header">
+        <span class="emergency-symbol">✚</span>
+        <div>
+          <span>CARETAG EMERGENCY PROFILE</span>
+          <h2 id="emergencyTitle">Medical information</h2>
+        </div>
+      </div>
+
+      <div class="emergency-person">
+        <div class="avatar large" id="modalInitials">CT</div>
+        <div>
+          <h3 id="modalName">Your Name</h3>
+          <p id="modalMeta">Age not set · Blood type not set</p>
+          <code id="modalId">CT-000000</code>
+        </div>
+      </div>
+
+      <div class="emergency-grid" id="emergencyContent"></div>
+
+      <div class="emergency-footer">
+        <p>
+          Verify information with the patient, family, or healthcare professional whenever possible.
+        </p>
+        <a id="callContact" class="call-button" href="#" aria-disabled="true">
+          Call emergency contact
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <script>
+const form = document.getElementById("careTagForm");
+const medicationList = document.getElementById("medicationList");
+const qrContainer = document.getElementById("qrcode");
+const toast = document.getElementById("toast");
+const modal = document.getElementById("emergencyModal");
+
+const STORAGE_KEY = "caretag-profile-v1";
+let encodedPayload = "";
+let saveTimer = null;
+
+const fields = {
+  fullName: document.getElementById("fullName"),
+  birthDate: document.getElementById("birthDate"),
+  bloodType: document.getElementById("bloodType"),
+  careTagId: document.getElementById("careTagId"),
+  allergies: document.getElementById("allergies"),
+  medicalHistory: document.getElementById("medicalHistory"),
+  contactName: document.getElementById("contactName"),
+  relationship: document.getElementById("relationship"),
+  contactPhone: document.getElementById("contactPhone")
+};
+
+function createCareTagId() {
+  const random = crypto.getRandomValues(new Uint32Array(1))[0]
+    .toString(36)
+    .toUpperCase()
+    .slice(0, 6)
+    .padStart(6, "0");
+
+  return `CT-${random}`;
+}
+
+function sanitizeText(value) {
+  return String(value || "").trim();
+}
+
+function calculateAge(dateString) {
+  if (!dateString) return null;
+
+  const birthDate = new Date(`${dateString}T00:00:00`);
+  const today = new Date();
+
+  if (Number.isNaN(birthDate.getTime()) || birthDate > today) return null;
+
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+
+  if (
+    monthDifference < 0 ||
+    (monthDifference === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age -= 1;
+  }
+
+  return age;
+}
+
+function getInitials(name) {
+  const parts = sanitizeText(name).split(/\s+/).filter(Boolean);
+  if (!parts.length) return "CT";
+  return parts.slice(0, 2).map(part => part[0].toUpperCase()).join("");
+}
+
+function splitItems(value) {
+  return sanitizeText(value)
+    .split(/[\n,;]+/)
+    .map(item => item.trim())
+    .filter(Boolean);
+}
+
+function addMedicationRow(data = {}) {
+  const item = document.createElement("div");
+  item.className = "medication-item";
+
+  item.innerHTML = `
+    <input class="med-name" type="text" maxlength="80"
+           placeholder="Medication name" aria-label="Medication name"
+           value="${escapeAttribute(data.name || "")}">
+    <input class="med-dose" type="text" maxlength="40"
+           placeholder="Dose" aria-label="Medication dose"
+           value="${escapeAttribute(data.dose || "")}">
+    <input class="med-schedule" type="text" maxlength="60"
+           placeholder="Schedule" aria-label="Medication schedule"
+           value="${escapeAttribute(data.schedule || "")}">
+    <button class="remove-medication" type="button"
+            aria-label="Remove medication" title="Remove">×</button>
+  `;
+
+  item.querySelector(".remove-medication").addEventListener("click", () => {
+    item.remove();
+    if (!medicationList.children.length) addMedicationRow();
+    updateAll();
+  });
+
+  item.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", updateAll);
+  });
+
+  medicationList.appendChild(item);
+}
+
+function escapeAttribute(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;");
+}
+
+function collectMedications() {
+  return [...medicationList.querySelectorAll(".medication-item")]
+    .map(item => ({
+      name: sanitizeText(item.querySelector(".med-name").value),
+      dose: sanitizeText(item.querySelector(".med-dose").value),
+      schedule: sanitizeText(item.querySelector(".med-schedule").value)
+    }))
+    .filter(med => med.name || med.dose || med.schedule);
+}
+
+function getSelectedSections() {
+  return [...document.querySelectorAll("[data-include]")]
+    .reduce((result, checkbox) => {
+      result[checkbox.dataset.include] = checkbox.checked;
+      return result;
+    }, {});
+}
+
+function collectProfile() {
+  return {
+    version: 1,
+    id: sanitizeText(fields.careTagId.value),
+    basic: {
+      fullName: sanitizeText(fields.fullName.value),
+      birthDate: fields.birthDate.value,
+      age: calculateAge(fields.birthDate.value),
+      bloodType: fields.bloodType.value
+    },
+    allergies: splitItems(fields.allergies.value),
+    medicalHistory: splitItems(fields.medicalHistory.value),
+    medications: collectMedications(),
+    emergencyContact: {
+      name: sanitizeText(fields.contactName.value),
+      relationship: sanitizeText(fields.relationship.value),
+      phone: sanitizeText(fields.contactPhone.value)
+    },
+    selected: getSelectedSections(),
+    updatedAt: new Date().toISOString()
+  };
+}
+
+function buildCompactProfile(profile) {
+  const payload = {
+    v: profile.version,
+    id: profile.id,
+    n: profile.basic.fullName || "Not provided",
+    dob: profile.basic.birthDate || "",
+    age: profile.basic.age,
+    bt: profile.basic.bloodType || "Unknown",
+    ec: {
+      n: profile.emergencyContact.name || "",
+      r: profile.emergencyContact.relationship || "",
+      p: profile.emergencyContact.phone || ""
+    }
+  };
+
+  if (profile.selected.allergies) {
+    payload.al = profile.allergies.length ? profile.allergies : ["None listed"];
+  }
+
+  if (profile.selected.history) {
+    payload.mh = profile.medicalHistory.length
+      ? profile.medicalHistory
+      : ["None listed"];
+  }
+
+  if (profile.selected.medications) {
+    payload.rx = profile.medications.length
+      ? profile.medications.map(med => ({
+          n: med.name || "",
+          d: med.dose || "",
+          s: med.schedule || ""
+        }))
+      : [];
+  }
+
+  return payload;
+}
+
+function encodeProfileForUrl(profile) {
+  const json = JSON.stringify(buildCompactProfile(profile));
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+
+  bytes.forEach(byte => {
+    binary += String.fromCharCode(byte);
+  });
+
+  return btoa(binary)
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replaceAll("=", "");
+}
+
+function getEmergencyPageUrl(profile) {
+  const encoded = encodeProfileForUrl(profile);
+
+  if (location.protocol === "http:" || location.protocol === "https:") {
+    const currentDirectory = new URL(".", location.href).href;
+    return `${currentDirectory}emergency.html#p=${encoded}`;
+  }
+
+  return "";
+}
+
+function updatePreview() {
+  const profile = collectProfile();
+  const ageLabel = profile.basic.age === null
+    ? "Age not set"
+    : `${profile.basic.age} years old`;
+  const bloodLabel = profile.basic.bloodType
+    ? `Blood type ${profile.basic.bloodType}`
+    : "Blood type not set";
+
+  document.getElementById("previewName").textContent =
+    profile.basic.fullName || "Your Name";
+  document.getElementById("previewMeta").textContent =
+    `${ageLabel} · ${bloodLabel}`;
+  document.getElementById("previewId").textContent =
+    profile.id || "CT-000000";
+  document.getElementById("avatarInitials").textContent =
+    getInitials(profile.basic.fullName);
+
+  document.getElementById("previewAllergies").textContent =
+    profile.allergies.length ? profile.allergies.join(", ") : "None listed";
+
+  document.getElementById("previewHistory").textContent =
+    profile.medicalHistory.length
+      ? profile.medicalHistory.join(", ")
+      : "None listed";
+
+  document.getElementById("previewMedications").textContent =
+    profile.medications.length
+      ? profile.medications.map(formatMedication).join(" · ")
+      : "None listed";
+
+  const contact = profile.emergencyContact;
+  document.getElementById("previewContact").textContent =
+    contact.name || contact.phone
+      ? `${contact.name || "Unnamed contact"}${contact.relationship ? ` (${contact.relationship})` : ""}${contact.phone ? ` · ${contact.phone}` : ""}`
+      : "Not provided";
+
+  document.getElementById("allergyAlert").style.display =
+    profile.selected.allergies ? "flex" : "none";
+
+  document.getElementById("previewHistory").parentElement.style.display =
+    profile.selected.history ? "block" : "none";
+
+  document.getElementById("previewMedications").parentElement.style.display =
+    profile.selected.medications ? "block" : "none";
+}
+
+function formatMedication(medication) {
+  return [
+    medication.name,
+    medication.dose,
+    medication.schedule
+  ].filter(Boolean).join(" — ");
+}
+
+function updateEmergencyModal() {
+  const profile = collectProfile();
+  const ageLabel = profile.basic.age === null
+    ? "Age not set"
+    : `${profile.basic.age} years old`;
+  const bloodLabel = profile.basic.bloodType
+    ? `Blood type ${profile.basic.bloodType}`
+    : "Blood type not set";
+
+  document.getElementById("modalName").textContent =
+    profile.basic.fullName || "Your Name";
+  document.getElementById("modalMeta").textContent =
+    `${ageLabel} · ${bloodLabel}`;
+  document.getElementById("modalId").textContent =
+    profile.id || "CT-000000";
+  document.getElementById("modalInitials").textContent =
+    getInitials(profile.basic.fullName);
+
+  const sections = [];
+
+  if (profile.selected.allergies) {
+    sections.push(`
+      <article class="emergency-section critical">
+        <small>KNOWN ALLERGIES</small>
+        <p>${escapeHtml(profile.allergies.length ? profile.allergies.join(", ") : "None listed")}</p>
+      </article>
+    `);
+  }
+
+  if (profile.selected.history) {
+    sections.push(`
+      <article class="emergency-section">
+        <small>MEDICAL HISTORY / CONDITIONS</small>
+        <p>${escapeHtml(profile.medicalHistory.length ? profile.medicalHistory.join(", ") : "None listed")}</p>
+      </article>
+    `);
+  }
+
+  if (profile.selected.medications) {
+    const medications = profile.medications.length
+      ? `<ul>${profile.medications.map(med => `<li>${escapeHtml(formatMedication(med))}</li>`).join("")}</ul>`
+      : "<p>None listed</p>";
+
+    sections.push(`
+      <article class="emergency-section full">
+        <small>CURRENT MEDICATIONS</small>
+        ${medications}
+      </article>
+    `);
+  }
+
+  const contact = profile.emergencyContact;
+  sections.push(`
+    <article class="emergency-section full">
+      <small>EMERGENCY CONTACT</small>
+      <p>
+        ${escapeHtml(contact.name || "Not provided")}
+        ${contact.relationship ? ` · ${escapeHtml(contact.relationship)}` : ""}
+        ${contact.phone ? ` · ${escapeHtml(contact.phone)}` : ""}
+      </p>
+    </article>
+  `);
+
+  document.getElementById("emergencyContent").innerHTML = sections.join("");
+
+  const callButton = document.getElementById("callContact");
+  if (contact.phone) {
+    callButton.href = `tel:${contact.phone.replace(/[^\d+]/g, "")}`;
+    callButton.setAttribute("aria-disabled", "false");
+  } else {
+    callButton.href = "#";
+    callButton.setAttribute("aria-disabled", "true");
+  }
+}
+
+function escapeHtml(value) {
+  const element = document.createElement("div");
+  element.textContent = String(value);
+  return element.innerHTML;
+}
+
+function generateQr() {
+  const profile = collectProfile();
+  encodedPayload = getEmergencyPageUrl(profile);
+  qrContainer.innerHTML = "";
+
+  if (!encodedPayload) {
+    qrContainer.innerHTML = `
+      <div class="qr-placeholder">
+        <span>!</span>
+        <p>Open the published CareTag website before generating the QR.</p>
+      </div>
+    `;
+    showToast("Open the published CareTag website first.");
+    return false;
+  }
+
+  if (typeof QRCode === "undefined") {
+    qrContainer.innerHTML = `
+      <div class="qr-placeholder">
+        <span>!</span>
+        <p>QR library did not load. Connect to the internet, then refresh the page.</p>
+      </div>
+    `;
+    showToast("QR library did not load. Refresh while connected.");
+    return false;
+  }
+
+  try {
+    new QRCode(qrContainer, {
+      text: encodedPayload,
+      width: 210,
+      height: 210,
+      colorDark: "#102f29",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.L
+    });
+
+    document.getElementById("downloadQR").disabled = false;
+    document.getElementById("copyData").disabled = false;
+    return true;
+  } catch (error) {
+    console.error(error);
+    qrContainer.innerHTML = `
+      <div class="qr-placeholder">
+        <span>!</span>
+        <p>The selected data is too long for this QR. Shorten the entries.</p>
+      </div>
+    `;
+    showToast("Please shorten the medical information.");
+    return false;
+  }
+}
+
+function validateForm() {
+  let isValid = true;
+
+  const validations = [
+    {
+      input: fields.fullName,
+      test: value => value.length >= 2
+    },
+    {
+      input: fields.contactName,
+      test: value => value.length >= 2
+    },
+    {
+      input: fields.contactPhone,
+      test: value => /^[+\d][\d\s()-]{6,}$/.test(value)
+    }
+  ];
+
+  validations.forEach(({ input, test }) => {
+    const field = input.closest(".field");
+    const valid = test(sanitizeText(input.value));
+    field.classList.toggle("invalid", !valid);
+    if (!valid) isValid = false;
+  });
+
+  return isValid;
+}
+
+function saveProfile() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(collectProfile()));
+  const saveStatus = document.getElementById("saveStatus");
+  saveStatus.textContent = "Saved locally";
+  window.setTimeout(() => {
+    saveStatus.textContent = "Auto-saved";
+  }, 1200);
+}
+
+function scheduleSave() {
+  document.getElementById("saveStatus").textContent = "Saving…";
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveProfile, 450);
+}
+
+function loadProfile() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+
+  if (!saved) {
+    fields.careTagId.value = createCareTagId();
+    addMedicationRow();
+    updateAll(false);
+    return;
+  }
+
+  try {
+    const profile = JSON.parse(saved);
+
+    fields.fullName.value = profile.basic?.fullName || "";
+    fields.birthDate.value = profile.basic?.birthDate || "";
+    fields.bloodType.value = profile.basic?.bloodType || "";
+    fields.careTagId.value = profile.id || createCareTagId();
+    fields.allergies.value = (profile.allergies || []).join(", ");
+    fields.medicalHistory.value = (profile.medicalHistory || []).join(", ");
+    fields.contactName.value = profile.emergencyContact?.name || "";
+    fields.relationship.value = profile.emergencyContact?.relationship || "";
+    fields.contactPhone.value = profile.emergencyContact?.phone || "";
+
+    medicationList.innerHTML = "";
+    const medications = profile.medications?.length
+      ? profile.medications
+      : [{}];
+    medications.forEach(addMedicationRow);
+
+    document.querySelectorAll("[data-include]").forEach(checkbox => {
+      const key = checkbox.dataset.include;
+      if (!checkbox.disabled && profile.selected && key in profile.selected) {
+        checkbox.checked = Boolean(profile.selected[key]);
+      }
+    });
+
+    document.getElementById("saveStatus").textContent = "Loaded locally";
+    updateAll(false);
+  } catch (error) {
+    console.error(error);
+    localStorage.removeItem(STORAGE_KEY);
+    fields.careTagId.value = createCareTagId();
+    addMedicationRow();
+    updateAll(false);
+  }
+}
+
+function updateAll(shouldSave = true) {
+  updatePreview();
+  updateEmergencyModal();
+  if (shouldSave) scheduleSave();
+}
+
+function showToast(message) {
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(showToast.timer);
+  showToast.timer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+function openModal() {
+  updateEmergencyModal();
+  modal.classList.add("open");
+  modal.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+  document.getElementById("closeModal").focus();
+}
+
+function closeModal() {
+  modal.classList.remove("open");
+  modal.setAttribute("aria-hidden", "true");
+  document.body.style.overflow = "";
+}
+
+form.addEventListener("input", event => {
+  if (event.target.matches("input, textarea, select")) {
+    event.target.closest(".field")?.classList.remove("invalid");
+    updateAll();
+  }
+});
+
+form.addEventListener("change", updateAll);
+
+form.addEventListener("submit", event => {
+  event.preventDefault();
+
+  if (!validateForm()) {
+    showToast("Please complete the required fields.");
+    form.querySelector(".invalid input")?.focus();
+    return;
+  }
+
+  saveProfile();
+  if (generateQr()) {
+    showToast("CareTag QR generated.");
+  }
+});
+
+document.getElementById("addMedication").addEventListener("click", () => {
+  addMedicationRow();
+  medicationList.lastElementChild.querySelector("input").focus();
+  updateAll();
+});
+
+document.getElementById("regenerateId").addEventListener("click", () => {
+  fields.careTagId.value = createCareTagId();
+  encodedPayload = "";
+  document.getElementById("downloadQR").disabled = true;
+  document.getElementById("copyData").disabled = true;
+  qrContainer.innerHTML = `
+    <div class="qr-placeholder">
+      <span>▦</span>
+      <p>Generate a new QR for the updated CareTag ID</p>
+    </div>
+  `;
+  updateAll();
+  showToast("New CareTag ID created.");
+});
+
+document.getElementById("resetForm").addEventListener("click", () => {
+  localStorage.removeItem(STORAGE_KEY);
+  form.reset();
+  medicationList.innerHTML = "";
+  addMedicationRow();
+  fields.careTagId.value = createCareTagId();
+  encodedPayload = "";
+  qrContainer.innerHTML = `
+    <div class="qr-placeholder">
+      <span>▦</span>
+      <p>Complete the form and generate your QR</p>
+    </div>
+  `;
+  document.getElementById("downloadQR").disabled = true;
+  document.getElementById("copyData").disabled = true;
+  updateAll(false);
+  document.getElementById("saveStatus").textContent = "Not saved";
+  showToast("CareTag form reset.");
+});
+
+document.getElementById("previewEmergency").addEventListener("click", openModal);
+document.getElementById("closeModal").addEventListener("click", closeModal);
+
+modal.addEventListener("click", event => {
+  if (event.target === modal) closeModal();
+});
+
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && modal.classList.contains("open")) closeModal();
+});
+
+document.getElementById("copyData").addEventListener("click", async () => {
+  if (!encodedPayload) return;
+
+  try {
+    await navigator.clipboard.writeText(encodedPayload);
+    showToast("CareTag emergency URL copied.");
+  } catch {
+    const temporary = document.createElement("textarea");
+    temporary.value = encodedPayload;
+    document.body.appendChild(temporary);
+    temporary.select();
+    document.execCommand("copy");
+    temporary.remove();
+    showToast("CareTag emergency URL copied.");
+  }
+});
+
+document.getElementById("downloadQR").addEventListener("click", () => {
+  const canvas = qrContainer.querySelector("canvas");
+  const image = qrContainer.querySelector("img");
+  let source = "";
+
+  if (canvas) source = canvas.toDataURL("image/png");
+  else if (image) source = image.src;
+
+  if (!source) {
+    showToast("Generate the QR code first.");
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.download = `${fields.careTagId.value || "caretag"}-qr.png`;
+  link.href = source;
+  link.click();
+});
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const isDark = document.body.classList.contains("dark");
+  document.getElementById("themeIcon").textContent = isDark ? "☀" : "☾";
+  localStorage.setItem("caretag-theme", isDark ? "dark" : "light");
+});
+
+const savedTheme = localStorage.getItem("caretag-theme");
+if (savedTheme === "dark") {
+  document.body.classList.add("dark");
+  document.getElementById("themeIcon").textContent = "☀";
+}
+
+loadProfile();
+
+</script>
+</body>
+</html>
